@@ -1,17 +1,17 @@
 {
   "manifest_version": 3,
-  "name": "Smart Student Registration Autofill",
+  "name": "Smart Form Autofill",
+  "description": "Fill registration forms across multiple websites using Excel data.",
   "version": "1.0.0",
-  "description": "Fill student registration forms across multiple websites using Excel data.",
   "permissions": ["storage", "activeTab", "sidePanel"],
   "host_permissions": ["<all_urls>"],
-  
+
   "icons": {
     "16": "icon.png",
     "48": "icon.png",
     "128": "icon.png"
   },
-  
+
   "action": {
     "default_title": "Smart Student Autofill",
     "default_icon": "icon.png"

@@ -363,7 +363,7 @@ export default function App() {
   return (
     <div className="app-container">
       <header>
-        <h1>Smart Student Autofill</h1>
+        <h1>Smart Form Autofill</h1>
         <div className="muted small">Site: {site.hostname}</div>
       </header>
 
@@ -399,7 +399,7 @@ export default function App() {
 
           <div style={{ marginBottom: "15px" }}>
             <span style={{ fontSize: "13px", fontWeight: "bold", display: "block", marginBottom: "5px" }}>
-              2. Upload Student Pictures (Select All):
+              2. Upload  Pictures (Select All):
             </span>
             <input
               type="file"
@@ -569,7 +569,7 @@ export default function App() {
               return (
                 <div style={{ marginTop: "12px", borderTop: "1px solid #30363d", paddingTop: "12px", textAlign: "center" }}>
                   <p style={{ fontSize: "12px", color: "#8b949e", marginBottom: "8px" }}>
-                    Student Picture (Upload this manually):
+                  Record  Picture (Upload this manually):
                   </p>
                   <img
                     src={img.url}
