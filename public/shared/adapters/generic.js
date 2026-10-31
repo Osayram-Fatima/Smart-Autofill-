@@ -88,7 +88,8 @@
     if (setter) setter.call(el, value);
     else el.value = value;
   }
-  // Naya Function: Website ko dhoka dene ke liye ke insaan type kar raha hai
+
+  // Website ko dhoka dene ke liye ke insaan type kar raha hai
   async function simulateTyping(el, value) {
     el.focus();
     setNativeValue(el, ""); // Pehle khali karein
@@ -107,29 +108,38 @@
       el.dispatchEvent(
         new KeyboardEvent("keyup", { key: str[i], bubbles: true }),
       );
-      // Chota sa wait taake website ko lage insaan type kar raha hai
       await new Promise((r) => setTimeout(r, 10));
     }
     el.dispatchEvent(new Event("change", { bubbles: true }));
     el.blur();
   }
-      async function fillField(field, value) {
+
+  async function fillField(field, value) {
     const el = document.querySelector(`[data-autofill-uid="${CSS.escape(field.uid)}"]`);
     if (!el) return { uid: field.uid, ok: false, reason: "element disappeared" };
 
-    const v = value == null ? "" : String(value);
+    let v = value == null ? "" : String(value);
+
+    // DATE FIX: Agar Excel se 38484 jesa number aya hai toh usko YYYY-MM-DD banayein
+    if (el.type === "date" && /^\d{5}$/.test(v)) {
+      const epoch = new Date(Date.UTC(1899, 11, 30));
+      const date = new Date(epoch.getTime() + parseInt(v, 10) * 86400000);
+      if (!isNaN(date.getTime())) {
+        v = date.toISOString().split('T')[0]; 
+      }
+    }
 
     try {
       if (el.tagName === "SELECT") {
-        // SELECT KE LIYE THODA WAIT KAREIN (taake dependent options load ho jayein)
-        await new Promise(r => setTimeout(r, 300));
+        // Dependent dropdowns ka wait
+        await new Promise(r => setTimeout(r, 400));
 
         const opts = Array.from(el.options);
         let chosen = opts.find((o) => o.value === v || o.textContent.trim().toLowerCase() === v.toLowerCase());
         
         if (!chosen) {
-           // Agar option phir bhi nahi mila, toh ek aur baar wait karke check karein
-           await new Promise(r => setTimeout(r, 500));
+           // Agar option nahi mila toh ek aur baar wait karein
+           await new Promise(r => setTimeout(r, 600));
            const newOpts = Array.from(el.options);
            chosen = newOpts.find((o) => o.value === v || o.textContent.trim().toLowerCase() === v.toLowerCase());
            
@@ -142,9 +152,10 @@
         el.dispatchEvent(new Event("change", { bubbles: true }));
         
       } else if (el.closest('.select2-container') || el.getAttribute('role') === 'combobox' || el.classList.contains('select2-hidden-accessible')) {
+        // Select2 Custom Dropdowns
         const container = el.closest('.select2-container') || el.parentElement;
         container.click();
-        await new Promise((resolve) => setTimeout(resolve, 300)); 
+        await new Promise((resolve) => setTimeout(resolve, 400)); 
         
         const options = document.querySelectorAll('.select2-results__option, [role="option"]');
         let clickedOpt = false;
@@ -161,6 +172,7 @@
            return { uid: field.uid, ok: false, reason: `Custom option "${v}" not found.` };
         }
       } else {
+        // Normal text/date input
         setNativeValue(el, v);
         el.dispatchEvent(new Event("input", { bubbles: true }));
         el.dispatchEvent(new Event("change", { bubbles: true }));
