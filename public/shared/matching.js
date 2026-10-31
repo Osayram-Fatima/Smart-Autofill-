@@ -1,5 +1,4 @@
 // shared/matching.js — field scoring
-// UMD-ish: works in popup (window) and content script (window).
 
 (function (global) {
   const STOPWORDS = new Set([
@@ -49,7 +48,6 @@
   }
 
   // Score how well an Excel column matches a detected field.
-  // Returns {score: 0..100, reasons: []}
   function scoreField(column, field) {
     const reasons = [];
     let score = 0;
@@ -79,7 +77,7 @@
         if (s >= 0.85) { score += 25; reasons.push("similar " + key); }
         else if (s >= 0.65) { score += 10; reasons.push("weak " + key); }
       }
-      // token overlap bonus
+      
       const fTokens = tokens(val);
       const overlap = fTokens.filter((t) => colTokens.has(t)).length;
       if (overlap > 0) {
@@ -109,16 +107,13 @@
   // Build best mapping suggestions: each column → best field (unique field per column)
   function suggestMappings(headers, fields) {
     const results = [];
-    const usedFields = new Set();
 
-    // Sort columns by best possible score to prioritize strong ones
     const colScores = headers.map((col) => {
       const scored = fields.map((f) => ({ field: f, ...scoreField(col, f) }));
       scored.sort((a, b) => b.score - a.score);
       return { col, scored };
     });
 
-    // Greedy assignment: strongest column→field pairs first
     const pairs = [];
     for (const { col, scored } of colScores) {
       for (const s of scored) {
@@ -143,7 +138,6 @@
       });
     }
 
-    // Unmatched columns
     for (const h of headers) {
       if (!assignedCols.has(h)) {
         results.push({ column: h, fieldUid: null, fieldLabel: "", confidence: 0, reasons: [], needsReview: true });
@@ -152,8 +146,5 @@
     return results;
   }
 
-  const api = { normalize, tokens, similarity, scoreField, suggestMappings };
-
-  if (typeof module !== "undefined" && module.exports) module.exports = api;
-  global.Matching = api;
+  global.Matching = { normalize, tokens, similarity, scoreField, suggestMappings };
 })(typeof window !== "undefined" ? window : self);

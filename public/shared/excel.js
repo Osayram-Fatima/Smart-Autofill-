@@ -1,5 +1,4 @@
 // shared/excel.js — parse .xlsx/.xls via SheetJS (must be loaded first)
-// Exposes window.ExcelMgr.
 
 (function (global) {
   function ensureXLSX() {
@@ -23,6 +22,7 @@
     if (!aoa.length) throw new Error("Sheet is empty.");
 
     const headers = (aoa[0] || []).map((h) => String(h || "").trim());
+    
     // Ensure unique headers
     const seen = new Map();
     const uniqueHeaders = headers.map((h) => {
@@ -38,7 +38,6 @@
       if (arr.every((v) => v === "" || v === null || v === undefined)) continue;
       const obj = {};
       uniqueHeaders.forEach((h, i) => {
-        // Preserve everything as text; date/id leading zeros safe.
         let v = arr[i];
         if (v === null || v === undefined) v = "";
         obj[h] = typeof v === "string" ? v : String(v);
@@ -50,8 +49,7 @@
       headers: uniqueHeaders,
       rows,
       fileName: file.name,
-      importedAt: Date.now(),
-      sheetName: firstSheet
+      importedAt: Date.now()
     };
   }
 

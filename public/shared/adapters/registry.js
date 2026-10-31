@@ -3,7 +3,11 @@
   function pickAdapter(hostname) {
     const list = global.SiteAdapters || [];
     for (const a of list) {
-      try { if (a.matchHost(hostname)) return a; } catch (_) {}
+      try {
+        if (a.matchHost(hostname)) return a;
+      } catch (err) {
+        console.error("[Smart Autofill] Adapter match error:", err);
+      }
     }
     return {
       name: "generic",

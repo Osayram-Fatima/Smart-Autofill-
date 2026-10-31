@@ -1,6 +1,5 @@
 /* global chrome */
 // content.js — runs on every page. Handles scan / fill / clear / verify.
-// Uses: window.Matching, window.Validation, window.GenericAdapter, window.AdapterRegistry, window.StorageMgr.
 
 (function () {
   const adapter = () =>
@@ -8,37 +7,17 @@
       ? window.AdapterRegistry.pickAdapter(location.hostname)
       : { name: "generic" };
 
-  function storageAvailable() {
-    return !!window.StorageMgr;
-  }
-
   async function getSavedMappings() {
-    if (storageAvailable())
-      return (
-        (await window.StorageMgr.getMappings(location.hostname)).mappings || []
-      );
-    return new Promise((resolve) => {
-      chrome.storage.local.get(["mappings_v1:" + location.hostname], (res) => {
-        resolve(res["mappings_v1:" + location.hostname]?.mappings || []);
-      });
-    });
+    if (window.StorageMgr) {
+      return (await window.StorageMgr.getMappings(location.hostname)).mappings || [];
+    }
+    return [];
   }
 
   async function saveMappings(mappings) {
-    if (storageAvailable())
+    if (window.StorageMgr) {
       return window.StorageMgr.setMappings(location.hostname, mappings);
-    return new Promise((resolve) => {
-      chrome.storage.local.set(
-        {
-          ["mappings_v1:" + location.hostname]: {
-            hostname: location.hostname,
-            mappings,
-            savedAt: Date.now(),
-          },
-        },
-        resolve,
-      );
-    });
+    }
   }
 
   async function handleScan() {
@@ -72,7 +51,7 @@
     return { fields, suggestions: out, savedCount: saved.length };
   }
 
-    async function handleFill(payload) {
+  async function handleFill(payload) {
     const fields = window.GenericAdapter ? window.GenericAdapter.scan() : [];
     if (!window.GenericAdapter) return { adapterName: "generic", results: [] };
 
@@ -85,15 +64,19 @@
       if (plan.fieldUid2) {
         let val1 = rawValue;
         let val2 = rawValue;
-        // (Phone/Date split logic remains the same)
+        
+        // Smart split for Phone Numbers
         if (plan.column.toLowerCase().includes("phone") || plan.column.toLowerCase().includes("mobile")) {
            const match = rawValue.match(/^\+?(\d{1,3})\s*(.*)$/); 
            if (match && rawValue.includes("+")) {
-             val1 = match[1]; val2 = match[2].replace(/\D/g, ''); 
+             val1 = match[1]; 
+             val2 = match[2].replace(/\D/g, ''); 
            } else {
-             val1 = "PK"; val2 = rawValue.replace(/\D/g, ''); 
+             val1 = "PK"; 
+             val2 = rawValue.replace(/\D/g, ''); 
            }
         }
+        
         const f1 = fields.find(f => f.uid === plan.fieldUid);
         if (f1) {
            const r1 = await window.GenericAdapter.fillField(f1, val1);
@@ -112,7 +95,7 @@
         }
       }
 
-      // CRITICAL FIX: Dependent Dropdowns ke liye 800ms (0.8 sec) ka delay
+      // Delay for dependent dropdowns
       await new Promise(r => setTimeout(r, 300)); 
     }
 
@@ -130,7 +113,7 @@
     return { ok: true, count: mappings.length };
   }
 
-  // Message listener
+  // Message Listener
   chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
     (async () => {
       try {
@@ -139,47 +122,31 @@
             sendResponse({ ok: true, data: await handleScan() });
             break;
           case "SUGGEST":
-            sendResponse({
-              ok: true,
-              data: await handleSuggest(msg.headers || []),
-            });
+            sendResponse({ ok: true, data: await handleSuggest(msg.headers || []) });
             break;
           case "FILL":
             sendResponse({ ok: true, data: await handleFill(msg) });
             break;
           case "SUBMIT_PAGE": {
-            const submitBtns = document.querySelectorAll(
-              'button[type="submit"], input[type="submit"], button',
-            );
+            const submitBtns = document.querySelectorAll('button[type="submit"], input[type="submit"], button');
             let clicked = false;
             for (const btn of submitBtns) {
               const btnText = (btn.innerText || btn.value || "").toLowerCase();
-              if (
-                btnText.includes("submit") ||
-                btnText.includes("register") ||
-                btnText.includes("save") ||
-                btnText.includes("confirm")
-              ) {
+              if (btnText.includes("submit") || btnText.includes("register") || btnText.includes("save") || btnText.includes("confirm")) {
                 btn.click();
                 clicked = true;
                 break;
               }
             }
-
             if (clicked) {
               sendResponse({ ok: true, data: { submitted: true } });
             } else {
-              const fallbackBtn = document.querySelector(
-                'button[type="submit"], input[type="submit"]',
-              );
+              const fallbackBtn = document.querySelector('button[type="submit"], input[type="submit"]');
               if (fallbackBtn) {
                 fallbackBtn.click();
                 sendResponse({ ok: true, data: { submitted: true } });
               } else {
-                sendResponse({
-                  ok: false,
-                  error: "Submit button nahi mila page par.",
-                });
+                sendResponse({ ok: false, error: "Submit button not found on page." });
               }
             }
             break;
@@ -188,10 +155,7 @@
             sendResponse({ ok: true, data: handleClear() });
             break;
           case "SAVE_MAPPINGS":
-            sendResponse({
-              ok: true,
-              data: await handleSaveMappings(msg.mappings || []),
-            });
+            sendResponse({ ok: true, data: await handleSaveMappings(msg.mappings || []) });
             break;
           default:
             sendResponse({ ok: false, error: "Unknown action: " + msg.action });
@@ -203,21 +167,5 @@
     return true; // async
   });
 
-  // Sirf EK baar pageshow event lagayein
-  window.addEventListener("pageshow", (event) => {
-    if (event.persisted) {
-      console.log("[Smart Autofill] Page restored from cache (Back/Forward).");
-    }
-    try {
-      chrome.runtime.sendMessage({
-        type: "PAGE_LOADED",
-        url: window.location.href,
-      });
-    } catch (e) {
-      console.log("Error sending PAGE_LOADED message:", e);
-    }
-  });
-
-  // Announce presence
-  console.log("[Smart Autofill] content script ready on", location.hostname);
+  console.log("[Smart Autofill] Ready on", location.hostname);
 })();
