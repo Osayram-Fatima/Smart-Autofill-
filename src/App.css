@@ -1,0 +1,99 @@
+/* Modern Chrome Extension UI */
+:root {
+  --bg-dark: #0f1115;
+  --bg-card: #1a1d24;
+  --text-main: #e6edf3;
+  --text-muted: #8b949e;
+  --primary: #3b82f6;
+  --primary-hover: #2563eb;
+  --success: #10b981;
+  --danger: #ef4444;
+  --border: #30363d;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  background-color: var(--bg-dark);
+  color: var(--text-main);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  width: 100%; /* Side panel ki width */
+  min-width: 380px;
+  height: 100vh;
+  overflow-y: auto;
+}
+
+.app-container { padding: 16px; display: flex; flex-direction: column; gap: 16px; }
+header h1 { font-size: 20px; margin: 0 0 4px 0; font-weight: 600; }
+.muted { color: var(--text-muted); }
+.small { font-size: 12px; }
+.flex-row { display: flex; gap: 8px; margin: 12px 0; align-items: center; flex-wrap: wrap; }
+
+/* Tabs */
+.tabs { display: flex; background: var(--bg-card); border-radius: 8px; padding: 4px; border: 1px solid var(--border); }
+.tab { flex: 1; background: transparent; border: none; color: var(--text-muted); padding: 8px 0; font-size: 13px; font-weight: 500; border-radius: 6px; cursor: pointer; transition: all 0.2s; }
+.tab:hover { color: var(--text-main); }
+.tab.active { background: var(--bg-dark); color: var(--text-main); box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
+
+/* Buttons */
+button { background: var(--primary); color: white; border: none; border-radius: 6px; padding: 8px 16px; font-size: 13px; font-weight: 500; cursor: pointer; transition: background 0.2s; }
+button:hover { background: var(--primary-hover); }
+button:disabled { opacity: 0.5; cursor: not-allowed; }
+.btn-success { background: var(--success); }
+.btn-success:hover { background: #059669; }
+.btn-danger { background: var(--danger); }
+.btn-danger:hover { background: #dc2626; }
+
+/* Cards & Lists */
+.card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 8px; padding: 16px; margin-top: 12px; }
+.card dl { margin: 12px 0 0 0; display: flex; flex-direction: column; gap: 8px; }
+.kv { display: flex; gap: 8px; font-size: 13px; }
+.kv dt { color: var(--text-muted); font-weight: 500; width: 100px; flex-shrink: 0; }
+.kv dd { margin: 0; color: var(--text-main); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+.list-item { background: var(--bg-card); border: 1px solid var(--border); border-radius: 8px; padding: 12px; margin-bottom: 8px; font-size: 13px; }
+.conf-ok { border-left: 4px solid var(--success); }
+.conf-warn { border-left: 4px solid #f59e0b; }
+
+/* Inputs & Selects */
+input[type="file"] { background: var(--bg-card); border: 1px dashed var(--border); padding: 12px; border-radius: 8px; width: 100%; color: var(--text-muted); cursor: pointer; }
+input[type="file"]::file-selector-button { background: var(--primary); color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-weight: 500; margin-right: 12px; }
+
+.map-select, .edit-input {
+  width: 100%; padding: 8px; background: var(--bg-dark); border: 1px solid var(--border);
+  color: var(--text-main); border-radius: 6px; font-size: 13px; outline: none;
+}
+.map-select:focus, .edit-input:focus { border-color: var(--primary); }
+
+/* Results */
+.results { margin-top: 16px; display: flex; flex-direction: column; gap: 6px; }
+.r { padding: 10px 12px; border-radius: 6px; font-size: 13px; font-weight: 500; }
+.r.ok { background: rgba(16, 185, 129, 0.1); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.2); }
+.r.bad { background: rgba(239, 68, 68, 0.1); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.2); }
+
+.batch-card { border: 2px solid var(--success); background: rgba(16, 185, 129, 0.05); }
+
+/* Custom Modals */
+.modal-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+.modal-box {
+  background: #1a1d24;
+  border: 1px solid #30363d;
+  border-radius: 8px;
+  padding: 20px;
+  width: 90%;
+  max-width: 350px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+}
+.modal-box h3 {
+  margin-top: 0;
+  color: #e6edf3;
+  font-size: 16px;
+}

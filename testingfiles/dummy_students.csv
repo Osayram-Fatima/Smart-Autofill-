@@ -1,0 +1,11 @@
+CATEGORY,SUB CATEGORY,FULL NAME,FATHER NAME,BCNIC,GENDER,DATE OF BIRTH,DIVISION,DISTRICT,TEHSIL,UNION COUNCIL,PHONE NUMBER,ADDRESS,SPORTS SELECTION,KIT SIZE,JOGGERS SIZE,,
+Individual,Athletics,Ahmad Ali,Muhammad Ali,35201-1234567-1,Male,4/12/2005,Lahore,Lahore City,Model Town,UC 1,0300-1234567,House 12, Street 4, Model Town,Cricket,Medium,Large
+Team,Cricket Team,Bilal Khan,Tariq Khan,35202-7654321-3,Male,8/22/2004,Karachi,Karachi Central,Gulberg Town,UC 2,0321-7654321,Flat 4B, Block C, Gulberg,Football,Large,Large
+Individual,Swimming,Ayesha Ahmed,Rashid Ahmed,35201-1112223-4,Female,11/5/2006,Lahore,Kasur,Chunian,UC 1,0333-1112223,Main Bazar, Near Post Office,Hockey,Small,Small,
+Individual,Athletics,Usman Tariq,Tariq Mahmood,35202-2223334-5,Male,1/15/2005,Karachi,Karachi South,Saddar,UC 2,0345-2223334,Shop 2, Saddar Bazar,Cricket,Medium,Medium,
+Team,Football Team,Zainab Fatima,Imran Ali,35201-3334445-6,Female,7/19/2003,Lahore,Lahore City,Gulberg,UC 1,0301-3334445,House 45, Street 10, Gulberg,Football,Large,Small
+Individual,Swimming,Hassan Raza,Ali Raza,35202-4445556-7,Male,2/28/2006,Karachi,Karachi Central,Liaquatabad,UC 2,0312-4445556,Block 5, Liaquatabad,Hockey,Small,Large,
+Team,Cricket Team,Fatima Noor,Noor Muhammad,35201-5556667-8,Female,9/30/2004,Lahore,Kasur,Kot Radha Kishan,UC 1,0334-5556667,Village Chak 12, Kot Radha Kishan,Cricket,Medium,Medium,
+Individual,Athletics,Ali Hamza,Hamza Yousuf,35202-6667778-9,Male,12/10/2005,Karachi,Karachi South,Clifton,UC 2,0322-6667778,Bungalow 3, Clifton Block 2,Football,Small,Small,
+Individual,Swimming,Sara Khan,Asif Khan,35201-7778889-0,Female,5/25/2006,Lahore,Lahore City,Model Town,UC 1,0300-7778889,House 8, Model Town Extension,Hockey,Medium,Large,
+Team,Football Team,Omar Farooq,Farooq Ahmed,35202-8889990-1,Male,10/14/2003,Karachi,Karachi Central,Gulberg Town,UC 2,0345-8889990,Flat 10A, Gulberg Town,Cricket,Large,Medium,
