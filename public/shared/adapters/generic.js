@@ -115,8 +115,11 @@
   }
 
   async function fillField(field, value) {
-    const el = document.querySelector(`[data-autofill-uid="${CSS.escape(field.uid)}"]`);
-    if (!el) return { uid: field.uid, ok: false, reason: "element disappeared" };
+    const el = document.querySelector(
+      `[data-autofill-uid="${CSS.escape(field.uid)}"]`,
+    );
+    if (!el)
+      return { uid: field.uid, ok: false, reason: "element disappeared" };
 
     let v = value == null ? "" : String(value);
 
@@ -125,51 +128,73 @@
       const epoch = new Date(Date.UTC(1899, 11, 30));
       const date = new Date(epoch.getTime() + parseInt(v, 10) * 86400000);
       if (!isNaN(date.getTime())) {
-        v = date.toISOString().split('T')[0]; 
+        v = date.toISOString().split("T")[0];
       }
     }
 
     try {
       if (el.tagName === "SELECT") {
-        // Dependent dropdowns ka wait
-        await new Promise(r => setTimeout(r, 400));
+        // SELECT KE LIYE ZYADA WAIT KAREIN (taake dependent options load ho jayein)
+        await new Promise((r) => setTimeout(r, 500));
 
-        const opts = Array.from(el.options);
-        let chosen = opts.find((o) => o.value === v || o.textContent.trim().toLowerCase() === v.toLowerCase());
-        
+        let opts = Array.from(el.options);
+        let chosen = opts.find(
+          (o) =>
+            o.value.toLowerCase() === v.toLowerCase() ||
+            o.textContent.trim().toLowerCase() === v.toLowerCase(),
+        );
+
+        // AGAR EXACT MATCH NAHI MILA (Smart Matching)
         if (!chosen) {
-           // Agar option nahi mila toh ek aur baar wait karein
-           await new Promise(r => setTimeout(r, 600));
-           const newOpts = Array.from(el.options);
-           chosen = newOpts.find((o) => o.value === v || o.textContent.trim().toLowerCase() === v.toLowerCase());
-           
-           if (!chosen) {
-             return { uid: field.uid, ok: false, reason: `Option "${v}" not found in dropdown.` };
-           }
+          await new Promise((r) => setTimeout(r, 800)); // Aur wait karein
+          opts = Array.from(el.options);
+          // Ab hum wo option dhoonden ge jo "Football" se shuru hota ho (jaise "Football Team")
+          chosen = opts.find(
+            (o) =>
+              o.value.toLowerCase().includes(v.toLowerCase()) ||
+              o.textContent.trim().toLowerCase().includes(v.toLowerCase()),
+          );
         }
-        
+
+        if (!chosen) {
+          return {
+            uid: field.uid,
+            ok: false,
+            reason: `Option "${v}" not found in dropdown.`,
+          };
+        }
+
         setNativeValue(el, chosen.value);
         el.dispatchEvent(new Event("change", { bubbles: true }));
-        
-      } else if (el.closest('.select2-container') || el.getAttribute('role') === 'combobox' || el.classList.contains('select2-hidden-accessible')) {
+      } else if (
+        el.closest(".select2-container") ||
+        el.getAttribute("role") === "combobox" ||
+        el.classList.contains("select2-hidden-accessible")
+      ) {
         // Select2 Custom Dropdowns
-        const container = el.closest('.select2-container') || el.parentElement;
+        const container = el.closest(".select2-container") || el.parentElement;
         container.click();
-        await new Promise((resolve) => setTimeout(resolve, 400)); 
-        
-        const options = document.querySelectorAll('.select2-results__option, [role="option"]');
+        await new Promise((resolve) => setTimeout(resolve, 400));
+
+        const options = document.querySelectorAll(
+          '.select2-results__option, [role="option"]',
+        );
         let clickedOpt = false;
         for (const opt of options) {
-           if (opt.textContent.trim().toLowerCase() === v.toLowerCase()) {
-              opt.click();
-              clickedOpt = true;
-              break;
-           }
+          if (opt.textContent.trim().toLowerCase() === v.toLowerCase()) {
+            opt.click();
+            clickedOpt = true;
+            break;
+          }
         }
-        
+
         if (!clickedOpt) {
-           document.body.click();
-           return { uid: field.uid, ok: false, reason: `Custom option "${v}" not found.` };
+          document.body.click();
+          return {
+            uid: field.uid,
+            ok: false,
+            reason: `Custom option "${v}" not found.`,
+          };
         }
       } else {
         // Normal text/date input
@@ -181,7 +206,6 @@
 
       await new Promise((r) => setTimeout(r, 30));
       return { uid: field.uid, ok: true, reason: "" };
-
     } catch (e) {
       return { uid: field.uid, ok: false, reason: e.message };
     }

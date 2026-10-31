@@ -283,7 +283,7 @@ export default function App() {
     setShowSubmitModal(true);
   };
 
-  const handleUpdateField = async (resultIndex, newValue) => {
+    const handleUpdateField = async (resultIndex, newValue) => {
     setEditErrors((prev) => ({ ...prev, [resultIndex]: null }));
     const result = fillResults[resultIndex];
     if (!result.column) return;
@@ -297,13 +297,22 @@ export default function App() {
     ];
     const studentData = { [result.column]: newValue };
 
-    try {
+        try {
       const res = await sendToActiveTab("FILL", {
         studentRow: studentData,
         mappingPlan: updatePlan,
       });
       
-      if (res && res.results && res.results[0]) {
+      // Agar response hi nahi mila ya connection fail hua
+      if (!res) {
+         throw new Error("Connection lost. Please refresh the page.");
+      }
+
+      if (res.ok === false) {
+         throw new Error(res.error);
+      }
+      
+      if (res.results && res.results[0]) {
         if (res.results[0].ok) {
           const newStudents = { ...students };
           newStudents.rows[currentIndex][result.column] = newValue;
@@ -315,17 +324,17 @@ export default function App() {
           newResults[resultIndex] = { ...result, ok: true, reason: "" };
           setFillResults(newResults);
         } else {
+          // Agar website ne accept nahi kiya
           setEditErrors((prev) => ({
             ...prev,
-            [resultIndex]: "Website did not accept this format. Try adding dashes.",
+            [resultIndex]: res.results[0].reason || "Website did not accept this value.",
           }));
         }
       }
     } catch (err) {
-      console.log("Error updating field:", err);
       setEditErrors((prev) => ({
         ...prev,
-        [resultIndex]: "Error: Could not connect to page. Refresh page and try again.",
+        [resultIndex]: err.message || "Error connecting to page.",
       }));
     }
   };
