@@ -47,8 +47,9 @@ export default function App() {
   const [batchActive, setBatchActive] = useState(false);
   const [batchIndex, setBatchIndex] = useState(0);
 
-  useEffect(() => {
+      useEffect(() => {
     const loadData = async () => {
+      // 1. Chrome Storage se Data wapis layein
       if (window.StorageMgr) {
         const saved = await window.StorageMgr.getStudents();
         if (saved && saved.rows && saved.rows.length > 0) {
@@ -56,6 +57,7 @@ export default function App() {
         }
       }
 
+      // 2. Current Site detect karein aur Mappings layein
       chrome.tabs.query({ active: true, currentWindow: true }, async (tabs) => {
         if (tabs[0]?.url) {
           try {
@@ -65,11 +67,7 @@ export default function App() {
 
             if (window.StorageMgr) {
               const savedMappings = await window.StorageMgr.getMappings(hostname);
-              if (
-                savedMappings &&
-                savedMappings.mappings &&
-                savedMappings.mappings.length > 0
-              ) {
+              if (savedMappings && savedMappings.mappings && savedMappings.mappings.length > 0) {
                 setSite((prev) => ({
                   ...prev,
                   suggestions: savedMappings.mappings.map((m) => ({
@@ -81,15 +79,32 @@ export default function App() {
                 }));
               }
             }
-          } catch (e) {
-            console.log("Error parsing URL:", e);
-          }
+          } catch (e) {}
         }
       });
     };
-    loadData();
-  }, []);
 
+    loadData();
+
+    // 3. NAYA CODE: Jab bhi tab update ho (jaise naya form khule), toh data wapis load karein
+    const handleTabUpdate = (tabId, changeInfo, tab) => {
+      if (changeInfo.status === 'complete') {
+        loadData();
+      }
+    };
+
+    if (chrome.tabs && chrome.tabs.onUpdated) {
+      chrome.tabs.onUpdated.addListener(handleTabUpdate);
+    }
+
+    // Cleanup
+    return () => {
+      if (chrome.tabs && chrome.tabs.onUpdated) {
+        chrome.tabs.onUpdated.removeListener(handleTabUpdate);
+      }
+    };
+  }, []);
+ 
   const handleFileUpload = async (e) => {
     setGlobalError(null);
     const file = e.target.files[0];
